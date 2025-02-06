@@ -1,0 +1,401 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  margin: 0 120px;
+}
+
+h1 {
+  font-size: 80px;
+  font-weight: 300;
+  line-height: 1.2;
+  margin: 16px 0;
+}
+
+p {
+  font-size: 20px;
+  font-weight: 300;
+  margin: 25px 0;
+}
+
+button {
+  background-color: #0d6efd;
+  color: #fff;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: 400;
+  border: none;
+  border-radius: 5px;
+}
+
+span {
+  padding: 2px 12px;
+  border-radius: 50%;
+  background-color: rgba(108, 117, 125, 1);
+  color: #fff;
+  margin-right: 10px;
+}
+
+.info {
+  color: #6c757d!important;
+  font-size: 16px;
+  margin-top: 50px;
+}
+
+img {
+  width: 50%;
+}
+
+/* Advanced CSS Styling for File Sharing App */
+
+/* Base Variables & Global Styles */
+:root {
+  --primary-color: #4caf50;
+  --accent-color: #2196f3;
+  --secondary-color: #ffffff;
+  --background-color: #f4f4f4;
+  --text-color: #333333;
+  --font-family: 'Roboto', sans-serif;
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Container Styling */
+.container {
+  max-width: 800px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: var(--secondary-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Header Styling */
+.container h1 {
+  text-align: center;
+  color: var(--primary-color);
+  margin-bottom: 1.2rem;
+  font-size: 2.5rem;
+  letter-spacing: 1px;
+}
+
+/* Paragraphs & Text Elements */
+.container p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+/* Button Styling */
+button {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+  display: inline-block;
+}
+
+button:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+/* Hide native file input */
+input[type="file"] {
+  display: none;
+}
+
+/* Image Styling */
+img {
+  max-width: 100%;
+  border-radius: var(--border-radius);
+  margin: 1rem 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Link Styling */
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: color var(--transition-speed) ease;
+}
+
+a:hover {
+  color: var(--primary-color);
+}
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  .container h1 {
+    font-size: 2rem;
+  }
+  button {
+    width: 100%;
+    font-size: 1.1rem;
+  }
+}
+/* Advanced CSS Styling for File Sharing App with Upload Progress */
+
+/* Root variables for easy theming */
+:root {
+  --primary-color: #4caf50;
+  --accent-color: #2196f3;
+  --secondary-color: #ffffff;
+  --background-color: #f4f4f4;
+  --text-color: #333333;
+  --font-family: 'Roboto', sans-serif;
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+}
+
+/* Global Reset & Base Styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Container */
+.container {
+  max-width: 800px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: var(--secondary-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Headings */
+.container h1 {
+  text-align: center;
+  color: var(--primary-color);
+  margin-bottom: 1.2rem;
+  font-size: 2.5rem;
+  letter-spacing: 1px;
+}
+
+/* Paragraphs */
+.container p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+/* Button Styling */
+button {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+  display: inline-block;
+}
+
+button:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+/* File Input */
+input[type="file"] {
+  display: none;
+}
+
+/* Upload Status & Progress Bars */
+.upload-status {
+  margin-top: 2rem;
+}
+
+.file-upload {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  background-color: #fafafa;
+}
+
+.progress-bar {
+  width: 100%;
+  background-color: #eee;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  height: 12px;
+  margin: 0.5rem 0;
+}
+
+.progress {
+  height: 100%;
+  background-color: var(--primary-color);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* File Items on View All Page */
+.file-item {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  background-color: #fafafa;
+}
+
+/* Links */
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: color var(--transition-speed) ease;
+}
+
+a:hover {
+  color: var(--primary-color);
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  .container h1 {
+    font-size: 2rem;
+  }
+  button {
+    width: 100%;
+    font-size: 1.1rem;
+  }
+}
+.aggregated-url {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8f9fa; /* Light gray background */
+  padding: 10px 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensures the text doesn't overflow */
+.aggregated-url a {
+  text-decoration: none;
+  color: #007bff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 85%;
+  display: inline-block;
+}
+
+/* Copy Button Styling */
+.aggregated-url .copy-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.aggregated-url .copy-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .aggregated-url {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 8px;
+  }
+
+  .aggregated-url a {
+      max-width: 100%;
+  }
+
+  .aggregated-url .copy-btn {
+      margin-top: 8px;
+      width: 100%;
+      text-align: center;
+  }
+}
+
