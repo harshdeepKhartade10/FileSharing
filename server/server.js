@@ -24,8 +24,8 @@
 // const PORT = process.env.PORT || 8000;
 // app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
-const express = require("express");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -59,6 +59,7 @@ app.get('/view-url', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
 
 // server/server.js
 // import express from "express";
