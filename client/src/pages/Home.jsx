@@ -1,4 +1,143 @@
-// // client/src/pages/Home.jsx
+
+// client/src/pages/Home.jsx
+import React, { useState, useRef } from "react";
+import { getUploadUrl, uploadFile, getViewUrl } from "../service/api";
+import { useNavigate } from "react-router-dom";
+import "../App.css";
+
+const Home = () => {
+  // Array to hold upload progress for each file.
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  // For aggregated view URL when more than one file is uploaded.
+  const [aggregatedViewUrl, setAggregatedViewUrl] = useState("");
+  const fileInputRef = useRef();
+  const navigate = useNavigate();
+
+  // Helper: check if MIME type starts with "image/"
+  const isImage = (mimeType) => mimeType.startsWith("image/");
+
+  // Handle file selection.
+  const onSelectFiles = async (e) => {
+    const selectedFiles = e.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) return;
+
+    // Local array to hold the keys (fileNames) from S3.
+    const aggregatedFileNames = [];
+    // Temporary state for tracking progress for each file.
+    let updatedFiles = [];
+
+    // Process files sequentially.
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+
+      // Step 1: Request pre-signed upload URL (include file MIME type)
+      const uploadData = await getUploadUrl(file.type);
+      if (!uploadData) {
+        console.error("Failed to get upload URL for", file.name);
+        continue;
+      }
+      const { uploadUrl, fileName } = uploadData;
+      aggregatedFileNames.push(fileName);
+
+      // Create a file object for progress tracking.
+      const fileObj = { fileName, fileType: file.type, viewUrl: "", progress: 0 };
+      updatedFiles = [...updatedFiles, fileObj];
+      setUploadedFiles(updatedFiles);
+
+      // Step 2: Upload the file using the pre-signed URL.
+      await uploadFile(uploadUrl, file, (percent) => {
+        updatedFiles = updatedFiles.map((f) =>
+          f.fileName === fileName ? { ...f, progress: percent } : f
+        );
+        setUploadedFiles(updatedFiles);
+      });
+      console.log("Upload complete for", file.name);
+
+      // Step 3: Request the view URL (this will be used later)
+      const viewUrl = await getViewUrl(fileName);
+      updatedFiles = updatedFiles.map((f) =>
+        f.fileName === fileName ? { ...f, viewUrl, progress: 100 } : f
+      );
+      setUploadedFiles(updatedFiles);
+    }
+
+    // If more than one file was selected, generate a single aggregated URL.
+    if (selectedFiles.length > 1) {
+      // Here we construct a URL to a dedicated "View All" page.
+      // The aggregated URL contains a query parameter with all file names (comma-separated).
+      const aggregatedURL = `/view-all?files=${aggregatedFileNames.join(",")}`;
+      setAggregatedViewUrl(aggregatedURL);
+    } else if (selectedFiles.length === 1 && updatedFiles.length > 0) {
+      // For a single file, set the aggregated URL equal to the file's view URL.
+      setAggregatedViewUrl(updatedFiles[0].viewUrl);
+    }
+  };
+
+  // Trigger the hidden file input.
+  const onButtonClick = () => {
+    fileInputRef.current.click();
+  };
+
+  return (
+    <div className="container">
+      <h1>File Sharing App</h1>
+      <p>Select one or more files:</p>
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={onSelectFiles}
+        accept="*/*"
+        multiple
+      />
+      <button onClick={onButtonClick}>Select Files</button>
+
+      {/* Show upload progress for each file */}
+      {uploadedFiles.length > 0 && (
+        <div className="upload-status">
+          <h2>Upload Progress:</h2>
+          {uploadedFiles.map((file, index) => (
+            <div key={index} className="file-upload">
+              <p>
+                {file.fileName} ({isImage(file.fileType) ? "Image" : "File"})
+              </p>
+              <div className="progress-bar">
+                <div className="progress" style={{ width: `${file.progress}%` }}></div>
+              </div>
+              {file.progress === 100 && (
+                <p>
+                  {/* In multi-upload mode, do not show individual URLs */}
+                  {uploadedFiles.length === 1 && (
+                    <>
+                      View URL:{" "}
+                      <a href={file.viewUrl} target="_blank" rel="noopener noreferrer">
+                        {file.viewUrl}
+                      </a>
+                    </>
+                  )}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* If aggregatedViewUrl exists (i.e. multiple files), display a single link */}
+      {aggregatedViewUrl && uploadedFiles.length > 1 && (
+        <div className="aggregated-url">
+          <h2>Combined File View URL</h2>
+          <p>
+            <a href={aggregatedViewUrl} target="_blank" rel="noopener noreferrer" >
+              {aggregatedViewUrl}
+            </a>
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Home;// // client/src/pages/Home.jsx
 // import React, { useState, useRef } from "react";
 // import { getUploadUrl, uploadFile, getViewUrl } from "../service/api";
 // import "../App.css";
@@ -178,143 +317,143 @@
 // export default Home;
 
 
-// client/src/pages/Home.jsx
-import React, { useState, useRef } from "react";
-import { getUploadUrl, uploadFile, getViewUrl } from "../service/api";
-import { useNavigate } from "react-router-dom";
-import "../App.css";
+// // client/src/pages/Home.jsx
+// import React, { useState, useRef } from "react";
+// import { getUploadUrl, uploadFile, getViewUrl } from "../service/api";
+// import { useNavigate } from "react-router-dom";
+// import "../App.css";
 
-const Home = () => {
-  // Array to hold upload progress for each file.
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  // For aggregated view URL when more than one file is uploaded.
-  const [aggregatedViewUrl, setAggregatedViewUrl] = useState("");
-  const fileInputRef = useRef();
-  const navigate = useNavigate();
+// const Home = () => {
+//   // Array to hold upload progress for each file.
+//   const [uploadedFiles, setUploadedFiles] = useState([]);
+//   // For aggregated view URL when more than one file is uploaded.
+//   const [aggregatedViewUrl, setAggregatedViewUrl] = useState("");
+//   const fileInputRef = useRef();
+//   const navigate = useNavigate();
 
-  // Helper: check if MIME type starts with "image/"
-  const isImage = (mimeType) => mimeType.startsWith("image/");
+//   // Helper: check if MIME type starts with "image/"
+//   const isImage = (mimeType) => mimeType.startsWith("image/");
 
-  // Handle file selection.
-  const onSelectFiles = async (e) => {
-    const selectedFiles = e.target.files;
-    if (!selectedFiles || selectedFiles.length === 0) return;
+//   // Handle file selection.
+//   const onSelectFiles = async (e) => {
+//     const selectedFiles = e.target.files;
+//     if (!selectedFiles || selectedFiles.length === 0) return;
 
-    // Local array to hold the keys (fileNames) from S3.
-    const aggregatedFileNames = [];
-    // Temporary state for tracking progress for each file.
-    let updatedFiles = [];
+//     // Local array to hold the keys (fileNames) from S3.
+//     const aggregatedFileNames = [];
+//     // Temporary state for tracking progress for each file.
+//     let updatedFiles = [];
 
-    // Process files sequentially.
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const file = selectedFiles[i];
+//     // Process files sequentially.
+//     for (let i = 0; i < selectedFiles.length; i++) {
+//       const file = selectedFiles[i];
 
-      // Step 1: Request pre-signed upload URL (include file MIME type)
-      const uploadData = await getUploadUrl(file.type);
-      if (!uploadData) {
-        console.error("Failed to get upload URL for", file.name);
-        continue;
-      }
-      const { uploadUrl, fileName } = uploadData;
-      aggregatedFileNames.push(fileName);
+//       // Step 1: Request pre-signed upload URL (include file MIME type)
+//       const uploadData = await getUploadUrl(file.type);
+//       if (!uploadData) {
+//         console.error("Failed to get upload URL for", file.name);
+//         continue;
+//       }
+//       const { uploadUrl, fileName } = uploadData;
+//       aggregatedFileNames.push(fileName);
 
-      // Create a file object for progress tracking.
-      const fileObj = { fileName, fileType: file.type, viewUrl: "", progress: 0 };
-      updatedFiles = [...updatedFiles, fileObj];
-      setUploadedFiles(updatedFiles);
+//       // Create a file object for progress tracking.
+//       const fileObj = { fileName, fileType: file.type, viewUrl: "", progress: 0 };
+//       updatedFiles = [...updatedFiles, fileObj];
+//       setUploadedFiles(updatedFiles);
 
-      // Step 2: Upload the file using the pre-signed URL.
-      await uploadFile(uploadUrl, file, (percent) => {
-        updatedFiles = updatedFiles.map((f) =>
-          f.fileName === fileName ? { ...f, progress: percent } : f
-        );
-        setUploadedFiles(updatedFiles);
-      });
-      console.log("Upload complete for", file.name);
+//       // Step 2: Upload the file using the pre-signed URL.
+//       await uploadFile(uploadUrl, file, (percent) => {
+//         updatedFiles = updatedFiles.map((f) =>
+//           f.fileName === fileName ? { ...f, progress: percent } : f
+//         );
+//         setUploadedFiles(updatedFiles);
+//       });
+//       console.log("Upload complete for", file.name);
 
-      // Step 3: Request the view URL (this will be used later)
-      const viewUrl = await getViewUrl(fileName);
-      updatedFiles = updatedFiles.map((f) =>
-        f.fileName === fileName ? { ...f, viewUrl, progress: 100 } : f
-      );
-      setUploadedFiles(updatedFiles);
-    }
+//       // Step 3: Request the view URL (this will be used later)
+//       const viewUrl = await getViewUrl(fileName);
+//       updatedFiles = updatedFiles.map((f) =>
+//         f.fileName === fileName ? { ...f, viewUrl, progress: 100 } : f
+//       );
+//       setUploadedFiles(updatedFiles);
+//     }
 
-    // If more than one file was selected, generate a single aggregated URL.
-    if (selectedFiles.length > 1) {
-      // Here we construct a URL to a dedicated "View All" page.
-      // The aggregated URL contains a query parameter with all file names (comma-separated).
-      const aggregatedURL = `/view-all?files=${aggregatedFileNames.join(",")}`;
-      setAggregatedViewUrl(aggregatedURL);
-    } else if (selectedFiles.length === 1 && updatedFiles.length > 0) {
-      // For a single file, set the aggregated URL equal to the file's view URL.
-      setAggregatedViewUrl(updatedFiles[0].viewUrl);
-    }
-  };
+//     // If more than one file was selected, generate a single aggregated URL.
+//     if (selectedFiles.length > 1) {
+//       // Here we construct a URL to a dedicated "View All" page.
+//       // The aggregated URL contains a query parameter with all file names (comma-separated).
+//       const aggregatedURL = `/view-all?files=${aggregatedFileNames.join(",")}`;
+//       setAggregatedViewUrl(aggregatedURL);
+//     } else if (selectedFiles.length === 1 && updatedFiles.length > 0) {
+//       // For a single file, set the aggregated URL equal to the file's view URL.
+//       setAggregatedViewUrl(updatedFiles[0].viewUrl);
+//     }
+//   };
 
-  // Trigger the hidden file input.
-  const onButtonClick = () => {
-    fileInputRef.current.click();
-  };
+//   // Trigger the hidden file input.
+//   const onButtonClick = () => {
+//     fileInputRef.current.click();
+//   };
 
-  return (
-    <div className="container">
-      <h1>File Sharing App</h1>
-      <p>Select one or more files:</p>
-      <input
-        type="file"
-        ref={fileInputRef}
-        style={{ display: "none" }}
-        onChange={onSelectFiles}
-        accept="*/*"
-        multiple
-      />
-      <button onClick={onButtonClick}>Select Files</button>
+//   return (
+//     <div className="container">
+//       <h1>File Sharing App</h1>
+//       <p>Select one or more files:</p>
+//       <input
+//         type="file"
+//         ref={fileInputRef}
+//         style={{ display: "none" }}
+//         onChange={onSelectFiles}
+//         accept="*/*"
+//         multiple
+//       />
+//       <button onClick={onButtonClick}>Select Files</button>
 
-      {/* Show upload progress for each file */}
-      {uploadedFiles.length > 0 && (
-        <div className="upload-status">
-          <h2>Upload Progress:</h2>
-          {uploadedFiles.map((file, index) => (
-            <div key={index} className="file-upload">
-              <p>
-                {file.fileName} ({isImage(file.fileType) ? "Image" : "File"})
-              </p>
-              <div className="progress-bar">
-                <div className="progress" style={{ width: `${file.progress}%` }}></div>
-              </div>
-              {file.progress === 100 && (
-                <p>
-                  {/* In multi-upload mode, do not show individual URLs */}
-                  {uploadedFiles.length === 1 && (
-                    <>
-                      View URL:{" "}
-                      <a href={file.viewUrl} target="_blank" rel="noopener noreferrer">
-                        {file.viewUrl}
-                      </a>
-                    </>
-                  )}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+//       {/* Show upload progress for each file */}
+//       {uploadedFiles.length > 0 && (
+//         <div className="upload-status">
+//           <h2>Upload Progress:</h2>
+//           {uploadedFiles.map((file, index) => (
+//             <div key={index} className="file-upload">
+//               <p>
+//                 {file.fileName} ({isImage(file.fileType) ? "Image" : "File"})
+//               </p>
+//               <div className="progress-bar">
+//                 <div className="progress" style={{ width: `${file.progress}%` }}></div>
+//               </div>
+//               {file.progress === 100 && (
+//                 <p>
+//                   {/* In multi-upload mode, do not show individual URLs */}
+//                   {uploadedFiles.length === 1 && (
+//                     <>
+//                       View URL:{" "}
+//                       <a href={file.viewUrl} target="_blank" rel="noopener noreferrer">
+//                         {file.viewUrl}
+//                       </a>
+//                     </>
+//                   )}
+//                 </p>
+//               )}
+//             </div>
+//           ))}
+//         </div>
+//       )}
 
-      {/* If aggregatedViewUrl exists (i.e. multiple files), display a single link */}
-      {aggregatedViewUrl && uploadedFiles.length > 1 && (
-        <div className="aggregated-url">
-          <h2>Combined File View URL</h2>
-          <p>
-            <a href={aggregatedViewUrl} target="_blank" rel="noopener noreferrer" >
-              {aggregatedViewUrl}
-            </a>
-          </p>
-        </div>
-      )}
-    </div>
-  );
-};
+//       {/* If aggregatedViewUrl exists (i.e. multiple files), display a single link */}
+//       {aggregatedViewUrl && uploadedFiles.length > 1 && (
+//         <div className="aggregated-url">
+//           <h2>Combined File View URL</h2>
+//           <p>
+//             <a href={aggregatedViewUrl} target="_blank" rel="noopener noreferrer" >
+//               {aggregatedViewUrl}
+//             </a>
+//           </p>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
 
-export default Home;
+// export default Home;
 
