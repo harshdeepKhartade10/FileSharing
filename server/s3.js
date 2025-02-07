@@ -1,5 +1,48 @@
 
+// server/s3.js
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import dotenv from "dotenv";
+import crypto from "crypto";
+import { promisify } from "util";
 
+dotenv.config();
+const randomBytes = promisify(crypto.randomBytes);
+
+const region = process.env.AWS_REGION;
+const bucketName = process.env.AWS_BUCKETNAME;
+const accessKeyId = process.env.AWS_ACCESSKEYID;
+const secretAccessKey = process.env.AWS_SECRETACCESSKEY;
+
+const s3 = new S3Client({
+  region,
+  credentials: { accessKeyId, secretAccessKey },
+});
+
+// Generate a pre-signed URL for uploading the file (PUT)
+// Now accepts a fileType parameter (e.g. "image/jpeg", "application/pdf")
+export const generateUploadUrl = async (fileType) => {
+  const bytes = await randomBytes(16);
+  const fileName = bytes.toString("hex"); // You may append an extension if desired
+
+  const putCommand = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: fileName,
+    ContentType: fileType, // use the file's MIME type
+  });
+
+  // URL expires in 60 seconds
+  const uploadUrl = await getSignedUrl(s3, putCommand, { expiresIn: 60 });
+  return { uploadUrl, fileName };
+};
+
+// Generate a "short" view URL by constructing the public URL
+// (This requires that your S3 bucket objects are publicly readable.)
+export const generateViewUrl = async (fileName) => {
+  // A typical public URL format (adjust if using a custom domain or CloudFront)
+  const viewUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${fileName}`;
+  return viewUrl;
+};
 // import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
 // import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -51,47 +94,47 @@
 // };
 
 
-// server/s3.js
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import dotenv from "dotenv";
-import crypto from "crypto";
-import { promisify } from "util";
+// // server/s3.js
+// import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+// import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+// import dotenv from "dotenv";
+// import crypto from "crypto";
+// import { promisify } from "util";
 
-dotenv.config();
-const randomBytes = promisify(crypto.randomBytes);
+// dotenv.config();
+// const randomBytes = promisify(crypto.randomBytes);
 
-const region = process.env.AWS_REGION;
-const bucketName = process.env.AWS_BUCKETNAME;
-const accessKeyId = process.env.AWS_ACCESSKEYID;
-const secretAccessKey = process.env.AWS_SECRETACCESSKEY;
+// const region = process.env.AWS_REGION;
+// const bucketName = process.env.AWS_BUCKETNAME;
+// const accessKeyId = process.env.AWS_ACCESSKEYID;
+// const secretAccessKey = process.env.AWS_SECRETACCESSKEY;
 
-const s3 = new S3Client({
-  region,
-  credentials: { accessKeyId, secretAccessKey },
-});
+// const s3 = new S3Client({
+//   region,
+//   credentials: { accessKeyId, secretAccessKey },
+// });
 
-// Generate a pre-signed URL for uploading the file (PUT)
-// Now accepts a fileType parameter (e.g. "image/jpeg", "application/pdf")
-export const generateUploadUrl = async (fileType) => {
-  const bytes = await randomBytes(16);
-  const fileName = bytes.toString("hex"); // You may append an extension if desired
+// // Generate a pre-signed URL for uploading the file (PUT)
+// // Now accepts a fileType parameter (e.g. "image/jpeg", "application/pdf")
+// export const generateUploadUrl = async (fileType) => {
+//   const bytes = await randomBytes(16);
+//   const fileName = bytes.toString("hex"); // You may append an extension if desired
 
-  const putCommand = new PutObjectCommand({
-    Bucket: bucketName,
-    Key: fileName,
-    ContentType: fileType, // use the file's MIME type
-  });
+//   const putCommand = new PutObjectCommand({
+//     Bucket: bucketName,
+//     Key: fileName,
+//     ContentType: fileType, // use the file's MIME type
+//   });
 
-  // URL expires in 60 seconds
-  const uploadUrl = await getSignedUrl(s3, putCommand, { expiresIn: 60 });
-  return { uploadUrl, fileName };
-};
+//   // URL expires in 60 seconds
+//   const uploadUrl = await getSignedUrl(s3, putCommand, { expiresIn: 60 });
+//   return { uploadUrl, fileName };
+// };
 
-// Generate a "short" view URL by constructing the public URL
-// (This requires that your S3 bucket objects are publicly readable.)
-export const generateViewUrl = async (fileName) => {
-  // A typical public URL format (adjust if using a custom domain or CloudFront)
-  const viewUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${fileName}`;
-  return viewUrl;
-};
+// // Generate a "short" view URL by constructing the public URL
+// // (This requires that your S3 bucket objects are publicly readable.)
+// export const generateViewUrl = async (fileName) => {
+//   // A typical public URL format (adjust if using a custom domain or CloudFront)
+//   const viewUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${fileName}`;
+//   return viewUrl;
+// };
